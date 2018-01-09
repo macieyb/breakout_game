@@ -28,6 +28,8 @@ var brickOffsetLeft = 30;
 var brickColor = "#0095DD";
 var brickCount = brickRowCount * brickColumnCount;
 
+var lives = 3;
+var livesColor = "#0095DD";
 var score = 0;
 var scoreColor = "#0095DD";
 
@@ -41,6 +43,14 @@ for (c = 0; c < brickColumnCount; c++) {
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false);
+
+function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+    }
+}
 
 function keyDownHandler(e) {
     if (e.keyCode === 39) {
@@ -89,6 +99,14 @@ function drawScore() {
     ctx.font = "16px Arial";
     ctx.fillStyle = scoreColor;
     ctx.fillText("Score: " + score, 8, 20);
+}
+
+// --- Draw lives ---
+
+function drawLives() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = livesColor;
+    ctx.fillText("Lives: " + lives, canvas.width - 65, 20);
 }
 
 // --- Draw the ball ---
@@ -145,6 +163,7 @@ function draw() {
     drawBall();
     drawPaddle();
     drawScore();
+    drawLives();
     collisionDetection();
     // bouncing off the top and bottom
     if (y + dy < ballRadius) {
@@ -157,8 +176,18 @@ function draw() {
             ballColor = "#" + colorRandomize();
         }
         else {
-            alert("GAME OVER! YOUR SCORE: " + score);
-            document.location.reload();
+            lives--;
+            if (!lives) {
+                alert("GAME OVER! YOUR SCORE: " + score);
+                document.location.reload();
+            }
+            else {
+                x = canvas.width / 2;
+                y = canvas.height - 30;
+                dx = 2;
+                dy = -2;
+                paddleX = (canvas.width - paddleWidth) / 2;
+            }
         }
     }
 
@@ -177,6 +206,7 @@ function draw() {
     else if (leftPressed && paddleX > 0) {
         paddleX -= 7;
     }
+    requestAnimationFrame(draw);
 }
 
-setInterval(draw, 10);
+draw();
